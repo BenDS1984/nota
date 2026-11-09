@@ -43,7 +43,7 @@ public static class DeviceCategories
     private static readonly Category[] MidiEffects =
     {
         new("Generate", ["Nota Arp", "Nota Chord", "Nota Random"]),
-        new("Shape", ["Nota Scale", "Nota Length", "Nota Velocity"]),
+        new("Shape", ["Nota Scale", "Nota Transpose", "Nota Length", "Nota Velocity"]),
         new("Racks", ["Nota MIDI Effect Rack"]),
     };
 

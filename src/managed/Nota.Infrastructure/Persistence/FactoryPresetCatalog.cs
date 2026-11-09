@@ -3045,7 +3045,27 @@ public sealed class FactoryPresetCatalog : IFactoryPresets
         Rnd("Frozen Groove",      chance: 1f,   vel: 0.4f, time: 0.25f, skip: 0.2f, seed: 42);
         Rnd("Frozen Arp Shuffle", chance: 0.7f, note: 7, oct: 0.5f, dist: 1, scale: true, seed: 128);
         Rnd("Frozen Melody",      chance: 0.9f, note: 5, dist: 2, scale: true, seed: 311);
+        // ---- Nota Transpose (MIDI, kind 7): whole octaves −4..+4 and semitones −12..+12.
+        Tr("Init");
+        Section("Octaves");
+        Tr("Octave Up",          oct: 1);
+        Tr("Octave Down",        oct: -1);
+        Tr("Two Octaves Up",     oct: 2);
+        Tr("Two Octaves Down",   oct: -2);
+        Section("Intervals");
+        Tr("Fifth Up",           semi: 7);
+        Tr("Fifth Down",         semi: -7);
+        Tr("Fourth Up",          semi: 5);
+        Tr("Fourth Down",        semi: -5);
+        Tr("Minor Third Up",     semi: 3);
+        Tr("Major Third Up",     semi: 4);
+        Tr("Whole Step Up",      semi: 2);
+        Tr("Half Step Down",     semi: -1);
     }
+
+    // A Nota Transpose preset (MIDI kind 7); both params are named so switching presets is exact.
+    private void Tr(string name, int oct = 0, int semi = 0)
+        => Midi("transpose", 7, name, ("Octave", oct), ("Semitones", semi));
 
     public IReadOnlyList<FactoryPresetInfo> All()
     {

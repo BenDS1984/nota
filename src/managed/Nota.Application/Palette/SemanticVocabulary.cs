@@ -79,6 +79,7 @@ public static class SemanticVocabulary
         T_("scale", R, "scale", "key", "гамма", "лад", "тональность");
         T_("notelength", R, "length", "duration", "длина", "длительность");
         T_("velocity", R, "velocity", "велосити", "сила");
+        T_("transpose", R, "transpose", "transposer", "транспонирование", "транспозиция", "транспонировать");
         T_("random", R, "random", "humanize", "humanise", "randomize", "рандом", "случайный", "очеловечить");
 
         // ---- character: how it sounds --------------------------------------------------

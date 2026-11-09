@@ -402,8 +402,8 @@ Device* RackCore::chainDeviceAt(int32_t chain, int32_t dev) const {
 }
 
 std::shared_ptr<MidiDevice> RackCore::makeChainMidiDevice(int32_t kind) {
-    // Built-in MIDI effects only; kind 6 is the MIDI Effect Rack itself, which never nests.
-    if (kind < 0 || kind > 5) return nullptr;
+    // Built-in MIDI effects only (0–5, 7 Transpose); kind 6 is the MIDI Effect Rack itself, which never nests.
+    if (kind < 0 || kind > 7 || kind == 6) return nullptr;
     return makeMidiDevice(kind);
 }
 

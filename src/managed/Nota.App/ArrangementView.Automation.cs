@@ -617,6 +617,12 @@ public sealed partial class ArrangementView
                     };
                     foreach (var (p, label) in outs) mMenu.Items.Add(MLeaf(m, p, label));
                 }
+                else if (e.MidiEffectKind(t.Id, m) == 7 && mpc > TransposeModel.PSemitones)
+                {
+                    // Nota Transpose: its two shifts.
+                    mMenu.Items.Add(MLeaf(m, TransposeModel.POctave, Loc.T("device.transpose.octave")));
+                    mMenu.Items.Add(MLeaf(m, TransposeModel.PSemitones, Loc.T("device.transpose.semitones")));
+                }
                 else if (e.MidiEffectKind(t.Id, m) == 5 && mpc > RandomModel.PLockBar)
                 {
                     // Nota Random: WHAT VARIES, then DICE. View (the card size) and Lock Bar (set by
