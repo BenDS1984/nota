@@ -3398,6 +3398,8 @@
     "preferences.deselect_moved_or_pasted_notes": "Deselect · moved or pasted notes replace the notes under them",
     "preferences.detail_panel": "Detail panel",
     "preferences.device_default": "Device default",
+    "preferences.device_size": "Device size",
+    "preferences.device_size_caption": "Makes the device cards in the Devices panel larger, their text and controls included, without changing the rest of the interface. Double-click the bar to go back to 100 %.",
     "preferences.devices_after_a_click_on": "Devices (after a click on a device)",
     "preferences.devices_settings": "Devices",
     "preferences.direction": "Direction",

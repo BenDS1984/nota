@@ -145,11 +145,12 @@ public sealed partial class DeviceChainView
             if (at >= _row.Children.Count) return;
             card = _row.Children[at].Bounds; x = card.X - half;
         }
-        var top = _row.TranslatePoint(new Point(x - _dropInsertBar.Width / 2, card.Y + 6), _dropLayer);
+        // The row may be scaled (Device size): translate the row point, then size the bar on screen.
+        var top = _row.TranslatePoint(new Point(x, card.Y + 6), _dropLayer);
         if (top is null) return;
-        Canvas.SetLeft(_dropInsertBar, top.Value.X);
+        Canvas.SetLeft(_dropInsertBar, top.Value.X - _dropInsertBar.Width / 2);
         Canvas.SetTop(_dropInsertBar, top.Value.Y);
-        _dropInsertBar.Height = CardH - 12;
+        _dropInsertBar.Height = (CardH - 12) * NotaDeviceScale.Factor;
         _dropInsertBar.IsVisible = true;
     }
 
@@ -159,8 +160,9 @@ public sealed partial class DeviceChainView
         if (p is null) return;
         Canvas.SetLeft(_dropReplaceRing, p.Value.X);
         Canvas.SetTop(_dropReplaceRing, p.Value.Y);
-        _dropReplaceRing.Width = card.Bounds.Width;
-        _dropReplaceRing.Height = card.Bounds.Height;
+        // Bounds are in the (possibly scaled) row; the ring sits on the unscaled drop layer.
+        _dropReplaceRing.Width = card.Bounds.Width * NotaDeviceScale.Factor;
+        _dropReplaceRing.Height = card.Bounds.Height * NotaDeviceScale.Factor;
         _dropReplaceRing.IsVisible = true;
     }
 

@@ -54,6 +54,10 @@ public sealed partial class DeviceChainView : UserControl
     // the Devices panel instead of floating in it.
     internal const double ChainInset = 6;
     private readonly StackPanel _row = new() { Orientation = Orientation.Horizontal, Spacing = ChainInset, Margin = new Thickness(ChainInset) };
+    // Device size (Settings → Appearance): the whole card row is drawn larger, so every fixed card
+    // layout keeps its proportions while its text and controls grow. Positions taken relative to
+    // _row (drags, drops) see through the transform.
+    private readonly LayoutTransformControl _rowScale;
     private int _trackId = -1;
     private readonly Grid _layout;
     private readonly ScrollViewer _outer;
@@ -113,9 +117,14 @@ public sealed partial class DeviceChainView : UserControl
         _kits = kits;
         _mosaic = mosaic;
         Focusable = true;   // so Ctrl+C/X/V + Delete on a selected device reach OnKeyDown
+        _rowScale = new LayoutTransformControl { Child = _row };
+        SetRowScale();
+        // Follow a change made in Settings while this view is on screen.
+        AttachedToVisualTree += (_, _) => { NotaDeviceScale.Changed -= OnDeviceScaleChanged; NotaDeviceScale.Changed += OnDeviceScaleChanged; OnDeviceScaleChanged(); };
+        DetachedFromVisualTree += (_, _) => NotaDeviceScale.Changed -= OnDeviceScaleChanged;
         var scroller = new ScrollViewer
         {
-            Content = _row,
+            Content = _rowScale,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
         };
@@ -152,6 +161,20 @@ public sealed partial class DeviceChainView : UserControl
         _outer.SizeChanged += (_, _) => FitLayoutHeight();
         Content = _outer;
         HookBrowserDrop();
+    }
+
+    private void SetRowScale()
+    {
+        double f = NotaDeviceScale.Factor;
+        _rowScale.LayoutTransform = f == 1 ? null : new ScaleTransform(f, f);
+    }
+
+    // The row rescales and the Devices panel refits its height to the new card row.
+    private void OnDeviceScaleChanged()
+    {
+        SetRowScale();
+        FitLayoutHeight();
+        UpdatePreferredHeight();
     }
 
     public void Show(int trackId) { _trackId = trackId; _rackSelChain = 0; ClearDeviceSelection(); _rackSel = null; _rackCmds = null; Rebuild(); }

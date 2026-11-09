@@ -48,7 +48,10 @@ public sealed partial class DeviceChainView
     }
 
     /// <summary>The chain's own height under the XL panel: the card row and its insets, plus the gap above.</summary>
-    internal const double XlChainPart = 3 * ChainInset + CardH;
+    internal static double XlChainPart => ChainInset + RowHeight;
+
+    /// <summary>The card row with its insets as drawn: scaled by the Device size setting.</summary>
+    internal static double RowHeight => (2 * ChainInset + CardH) * NotaDeviceScale.Factor;
 
     private readonly Border _xlHost = new() { IsVisible = false, Margin = new Thickness(ChainInset, ChainInset, ChainInset, 0) };
     private int _xlIndex = -1;   // the shown track's device in the panel, or -1
@@ -110,14 +113,14 @@ public sealed partial class DeviceChainView
 
     private void UpdatePreferredHeight()
     {
-        double h = 2 * ChainInset + CardH + (_xlIndex >= 0 ? _xlHeight + ChainInset : 0);
+        double h = RowHeight + (_xlIndex >= 0 ? _xlHeight + ChainInset : 0);
         if (Math.Abs(h - _preferredHeight) > 0.5) { _preferredHeight = h; PreferredHeightChanged?.Invoke(); }
     }
 
     // The grid fills the view, but never below the panel's minimum plus the chain (then it scrolls).
     private void FitLayoutHeight()
     {
-        double min = _xlIndex >= 0 ? XlMinHeight + ChainInset + 2 * ChainInset + CardH : 0;
+        double min = _xlIndex >= 0 ? XlMinHeight + ChainInset + RowHeight : 0;
         double vh = _outer.Bounds.Height;
         _layout.Height = vh > 0 ? Math.Max(vh, min) : double.NaN;
     }

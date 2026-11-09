@@ -1342,6 +1342,43 @@ public sealed partial class PreferencesWindow : NotaWindow
         return new Border { Classes = { "segmented" }, HorizontalAlignment = HorizontalAlignment.Left, Child = strip };
     }
 
+    // 100–125 % for the device cards only, in whole percent steps: the shell's value bar with the
+    // size written inside. Applies live while dragging; saved when the drag ends. Double-click
+    // goes back to 100 %.
+    private static Control DeviceSizeSlider()
+    {
+        var settings = App.Services.GetRequiredService<ISettingsService>();
+        const double Span = DeviceScale.Max - DeviceScale.Min;
+        static double NormOf(int p) => (p - DeviceScale.Min) / Span;
+        static int PercentOf(double n) => DeviceScale.Min + (int)Math.Round(n * Span);
+        void Save(int p)
+        {
+            if (settings.Current.DeviceScale == p) return;
+            settings.Current.DeviceScale = p;
+            settings.Save();
+        }
+        SliderTrack? bar = null;
+        bar = new SliderTrack
+        {
+            Shell = true, Width = 200, HorizontalAlignment = HorizontalAlignment.Left,
+            Text = () => $"{NotaDeviceScale.Percent} %",
+            Reset = () =>
+            {
+                bar!.Norm = 0;
+                NotaDeviceScale.Set(DeviceScale.Default);
+                Save(DeviceScale.Default);
+            },
+        };
+        bar.Norm = NormOf(DeviceScale.Normalize(settings.Current.DeviceScale));
+        bar.Changed += n =>
+        {
+            NotaDeviceScale.Set(PercentOf(n));
+            bar.InvalidateVisual();
+        };
+        bar.GestureEnd += () => Save(NotaDeviceScale.Percent);
+        return bar;
+    }
+
     private Control AppearancePane()
     {
         var settings = App.Services.GetService<ISettingsService>();
@@ -1367,7 +1404,9 @@ public sealed partial class PreferencesWindow : NotaWindow
                 Row(Loc.T("preferences.interface_scale"), ScalePicker()),
                 Row("", Caption(Loc.T("preferences.makes_the_whole_interface_larger"))),
                 Row(Loc.T("preferences.text_size"), TextSizePicker()),
-                Row("", Caption(Loc.T("preferences.text_size_caption")))),
+                Row("", Caption(Loc.T("preferences.text_size_caption"))),
+                Row(Loc.T("preferences.device_size"), DeviceSizeSlider()),
+                Row("", Caption(Loc.T("preferences.device_size_caption")))),
             Section(Loc.T("preferences.status_bar"), 10, statusBar,
                 Caption(Loc.T("preferences.show_status_bar_caption"))));
     }
