@@ -591,6 +591,7 @@ public partial class MainWindow : Window
         VersionButton.Click += (_, _) => ShowWhatsNew();
         SetUpAudioFormatButton();
         DropoutButton.Click += (_, _) => vm.ResetDropouts();   // count again from zero (#271)
+        SetUpStatusBarVisibility();   // Settings → Appearance can hide the bar
 
         Closed += (_, _) =>
         {
