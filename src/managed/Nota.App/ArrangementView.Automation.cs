@@ -622,6 +622,8 @@ public sealed partial class ArrangementView
                     // Nota Transpose: its two shifts.
                     mMenu.Items.Add(MLeaf(m, TransposeModel.POctave, Loc.T("device.transpose.octave")));
                     mMenu.Items.Add(MLeaf(m, TransposeModel.PSemitones, Loc.T("device.transpose.semitones")));
+                    if (mpc > TransposeModel.PFollow)
+                        mMenu.Items.Add(MLeaf(m, TransposeModel.PFollow, Loc.T("device.transpose.follow_held")));
                 }
                 else if (e.MidiEffectKind(t.Id, m) == 5 && mpc > RandomModel.PLockBar)
                 {

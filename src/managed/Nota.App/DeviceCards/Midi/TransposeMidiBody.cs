@@ -4,7 +4,8 @@
 // Detail · Devices — the Nota Transpose editor (MIDI effect kind 7), one S card (260 × 260):
 // the total shift large ("+7 st") with its interval name ("perfect fifth up"), a three-octave
 // keyboard with the last note played outlined (in) and where it went filled (out), and two
-// knobs — Octave (−4…+4) and Semitones (−12…+12), whole steps only. The keyboard shows real
+// knobs — Octave (−4…+4) and Semitones (−12…+12), whole steps only — and a Follow held notes
+// switch (a change moves the keys still down, on by default). The keyboard shows real
 // notes from the device (telemetry), not a demo.
 
 using System;
@@ -21,7 +22,7 @@ namespace Nota.App;
 /// <summary>Nota Transpose's params in musical units — mirrors MidiTranspose.h.</summary>
 internal static class TransposeModel
 {
-    internal const int POctave = 0, PSemitones = 1;
+    internal const int POctave = 0, PSemitones = 1, PFollow = 2;
     internal const int OctMax = 4, SemiMax = 12;
 
     internal static int Octave(Func<int, float> g) => Math.Clamp((int)Math.Round(g(POctave)), -OctMax, OctMax);
@@ -69,6 +70,7 @@ internal sealed class TransposeMidiBody : IMidiDeviceBody
     private static readonly IBrush Txt = NotaPalette.TextPrimary;
     private static readonly IBrush Sub = NotaPalette.TextSecondary;
     private static readonly IBrush Cap = NotaPalette.TextTertiary;
+    private static readonly IBrush Muted = NotaPalette.TextMuted;
 
     public double Width => 260;
     public bool FullBleed => true;
@@ -148,10 +150,34 @@ internal sealed class TransposeMidiBody : IMidiDeviceBody
         Grid.SetColumn(semi, 1);
         knobs.Children.Add(oct); knobs.Children.Add(semi);
 
+        // ---- Follow held notes: a switch + sentence-case label ----
+        Control Flag(int p, string label, string tip)
+        {
+            var sw = new SwitchTrack { VerticalAlignment = VerticalAlignment.Center };
+            var tb = new TextBlock { Text = label, FontSize = 8, VerticalAlignment = VerticalAlignment.Center };
+            var row = new Border { Background = Brushes.Transparent, Cursor = new Cursor(StandardCursorType.Hand), HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 4, 0, 0),
+                Child = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, Children = { sw, tb } } };
+            row.PointerPressed += (_, ev) =>
+            {
+                if (!ev.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return;
+                Begin(p); S(p, G(p) >= 0.5f ? 0 : 1); End(p); Refresh(); ev.Handled = true;
+            };
+            ToolTip.SetTip(row, tip);
+            MidiLearn.Bind(row, MidiTarget.MidiDeviceParam(track, mi, p), label);
+            readouts.Add(() => { bool on = G(p) >= 0.5f; sw.IsOn = on; tb.Foreground = on ? Txt : Muted; });
+            return row;
+        }
+        Control? follow = engine.MidiEffectParamCount(track, mi) > TransposeModel.PFollow
+            ? Flag(TransposeModel.PFollow, Loc.T("device.transpose.follow_held"), Loc.T("device.transpose.follow_held_tip"))
+            : null;
+
         DockPanel.SetDock(head, Dock.Top);
         DockPanel.SetDock(knobs, Dock.Bottom);
         DockPanel.SetDock(lastIO, Dock.Bottom);
-        var inner = new DockPanel { Children = { head, knobs, lastIO, keys } };
+        var inner = new DockPanel { Children = { head } };
+        if (follow != null) { DockPanel.SetDock(follow, Dock.Bottom); inner.Children.Add(follow); }
+        inner.Children.Add(knobs); inner.Children.Add(lastIO); inner.Children.Add(keys);
         keys.VerticalAlignment = VerticalAlignment.Center;
         var island = new RuleSection { Padding = new Thickness(8, 4, 8, 4), Child = inner };
 

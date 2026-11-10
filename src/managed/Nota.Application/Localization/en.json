@@ -1864,6 +1864,8 @@
     "device.synth.cycles_unison": "{0} · {1} cycles · unison {2}",
     "device.synth.vel_vol_off": "Vel → Vol  off",
     "device.transpose.down": "{0} down",
+    "device.transpose.follow_held": "Follow held notes",
+    "device.transpose.follow_held_tip": "On: turning a knob moves the notes you are holding — each starts again at the new pitch. Off: held notes stay where they began; only new notes move.",
     "device.transpose.keyboard_tip": "The last note played: outlined where it came in, filled where it went out.",
     "device.transpose.major_second": "major second",
     "device.transpose.major_seventh": "major seventh",
