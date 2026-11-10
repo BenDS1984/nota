@@ -236,6 +236,13 @@ public partial class MainWindow
         else if (Timeline.SelectedTrackId > 0) ShowDevices(Timeline.SelectedTrackId);
         DetailPanel.IsVisible = true;
     }
+    // The transport bar's Detail key: the same toggle as View → Toggle detail panel. The key
+    // shows the panel's state, not its own click (a click that changes nothing leaves it as is).
+    private void OnDetailToggleClick(object? sender, RoutedEventArgs e)
+    {
+        OnMenuToggleClip(sender, e);
+        DetailToggleBtn.IsChecked = DetailPanel.IsVisible;
+    }
     private void OnMenuToggleOverview(object? sender, EventArgs e)
     {
         Timeline.ShowOverview = !Timeline.ShowOverview;

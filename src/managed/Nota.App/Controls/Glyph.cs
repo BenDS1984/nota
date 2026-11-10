@@ -40,6 +40,7 @@ internal enum GlyphKind
     Lock, LockOpen,                // a reference (read-only) clip in the multi-clip editor, and the unlocked toggle
     DockIn,                        // PopOut's opposite: bring a floating window back into the main one
     Expand, Shrink,                // a panel filling the window, and back to its split
+    BottomPanel,                   // the Detail panel docked under the work area
 }
 
 internal sealed class Glyph : Control
@@ -474,6 +475,8 @@ internal sealed class Glyph : Control
         [GlyphKind.History] = ("M4.601 9.2 A8 8 0 1 1 4 12 M4.601 9.2 L3.6 5.8 M4.601 9.2 L8 8.599 M12 7.601 V12 L15 14", null),
         // A window with its left sidebar ruled off.
         [GlyphKind.Sidebar] = ("M3.5 5.5 h17 v13 h-17 zM9.5 5.5 v13", null),
+        // A window with a panel ruled off along its bottom (the Detail panel).
+        [GlyphKind.BottomPanel] = ("M3.5 5.5 h17 v13 h-17 zM3.5 13.5 h17", null),
         // Three centred rules, shortening downward (view options).
         [GlyphKind.Options] = ("M4 7 H20 M7 12 H17 M10 17 H14", null),
         // A magnifier.
