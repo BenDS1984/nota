@@ -57,7 +57,12 @@ public sealed class Knob : Control
     /// <summary>Onto the three-size scale: up to 34 is secondary, under 40 regular, else main.</summary>
     public static double Snap(double v) => double.IsNaN(v) ? v : v <= SizeSecondary ? SizeSecondary : v < 40 ? SizeRegular : SizeMain;
 
-    private double Fixed(double v) => double.IsNaN(v) ? v : _inline ? SizeInline : _flat ? SizeFlat : Snap(v);
+    private double Fixed(double v) => double.IsNaN(v) ? v : _inline ? SizeInline : _flat ? SizeFlat : _free ? v : Snap(v);
+
+    /// <summary>Keeps the size it is given instead of snapping to the three-size scale — for a
+    /// card laid out for larger text (laptop-test), whose knobs sit between the scale's sizes.</summary>
+    public bool FreeSize { get => _free; init { _free = value; CoerceValue(WidthProperty); CoerceValue(HeightProperty); } }
+    private readonly bool _free;
 
     /// <summary>The 24 px table-row knob, outside the three-size scale (see the header).</summary>
     public bool Inline { get => _inline; init { _inline = value; CoerceValue(WidthProperty); CoerceValue(HeightProperty); } }

@@ -51,6 +51,12 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
     private static readonly string[] NoteNames = { "C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B" };
 
     public double Width => 700;
+    /// <summary>How many points larger than the device scale this card draws its text (laptop-test).</summary>
+    private const int TextStep = 2;
+    /// <summary>The right panel's label and value columns, widened for the larger text (were 40 and 34).</summary>
+    private const double LabW = 50, ValW = 46;
+    /// <summary>Every knob but Dry/wet (44): larger than the scale's 34 for the larger text.</summary>
+    private const double KnobSize = 40;
     // S / L / XL (#531, #540): the size is the device's View param (DeviceView); S is a 260 card,
     // XL the L body stretched in the panel above the chain (or the pop-out window).
     public double WidthFor(IAudioEngine engine, int trackId, int deviceIndex) => CardLayout.WidthFor(engine, trackId, deviceIndex, Width);
@@ -212,7 +218,7 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
         }
 
         // Slider row: caps label · track · mono value.
-        Control SliderRow(string label, int p, Func<double, string> fmt, bool bipolar = false, bool modulation = false, Func<bool>? dim = null, double labW = 40, double valW = 34)
+        Control SliderRow(string label, int p, Func<double, string> fmt, bool bipolar = false, bool modulation = false, Func<bool>? dim = null, double labW = LabW, double valW = ValW)
         {
             var bar = DeviceCardKit.SliderRow("", () => P(p), v => Raw(p, (float)v), () => fmt(P(p)), out var sync,
                 begin: () => Begin(p), end: () => End(p), reset: () => Reset(p), bipolar: bipolar, dim: dim, valueWidth: valW, modulation: modulation);
@@ -225,10 +231,10 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
         }
 
         // Gauge knob over a normalized param (automation gesture, MIDI learn, live follow).
-        Control K(int p, string name, Func<double, string> fmt, double cellW = 50, double size = 34, bool bipolar = false)
+        Control K(int p, string name, Func<double, string> fmt, double cellW = 50, double size = KnobSize, bool bipolar = false)
         {
             var val = Mono(fmt(P(p)), 7, TextPrimary);
-            var knob = new Knob(P(p), 1.0) { Accent = true, Bipolar = bipolar, Default = engine.DeviceParamDefault(track, di, p), Width = size, Height = size };
+            var knob = new Knob(P(p), 1.0) { Accent = true, FreeSize = true, Bipolar = bipolar, Default = engine.DeviceParamDefault(track, di, p), Width = size, Height = size };
             knob.Format = fmt;
             knob.ValueChanged += v => { Raw(p, (float)v); val.Text = fmt(P(p)); };
             knob.GestureBegin += () => Begin(p);
@@ -237,16 +243,36 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
             readouts.Add(() => { if (knob.Dragging) return; double c = P(p); if (Math.Abs(c - knob.Value) > 1e-4) knob.Value = c; val.Text = fmt(P(p)); });
             return KnobCell(name, knob, val, cellW);
         }
-        // A column of knob cells spread evenly down the height.
+        // A column of knob cells spread evenly down the height. Larger text (laptop-test): each
+        // cell sits side by side — the knob, then its value over its name — so three knobs and
+        // their two lines of text fit the graph's height without touching.
         static Control KnobColumn(params Control[] cells)
         {
-            var g = new Grid { Width = 50 };
+            var g = new Grid { Width = 92 };
             for (int i = 0; i < cells.Length; i++)
             {
                 g.RowDefinitions.Add(new RowDefinition(GridLength.Star));
-                cells[i].VerticalAlignment = VerticalAlignment.Center;
-                g.Children.Add(GRow(cells[i], i));
+                var cell = SideCell(cells[i]);
+                cell.VerticalAlignment = VerticalAlignment.Center;
+                g.Children.Add(GRow(cell, i));
             }
+            return g;
+        }
+        // KnobCell's knob · value · name, re-laid as the knob with its value and name on its right.
+        static Control SideCell(Control cell)
+        {
+            if (cell is not StackPanel { Children.Count: 3 } sp) return cell;
+            var knob = (Control)sp.Children[0];
+            var value = (TextBlock)sp.Children[1];
+            var name = (TextBlock)sp.Children[2];
+            sp.Children.Clear();
+            value.HorizontalAlignment = name.HorizontalAlignment = HorizontalAlignment.Left;
+            value.TextAlignment = name.TextAlignment = TextAlignment.Left;
+            name.MaxWidth = double.PositiveInfinity;
+            var text = new StackPanel { Spacing = 1, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0, 0, 0), Children = { value, name } };
+            var g = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*") };
+            g.Children.Add(knob);
+            g.Children.Add(Col(text, 1));
             return g;
         }
 
@@ -485,7 +511,7 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
         {
             var title = new TextBlock { Text = Loc.T("device.auto_filter.modulation"), FontSize = 9, FontWeight = FontWeight.Medium, Foreground = TextSecondary, VerticalAlignment = VerticalAlignment.Center };
             var target = Chips(new[] { "Freq", "Reso", "Both" }, i => Target() == i, i => SetP(ModTarget, i / 2f), ModTarget, h: 15, padX: 6);
-            var tRow = new Grid { ColumnDefinitions = new ColumnDefinitions("40,*") };
+            var tRow = new Grid { ColumnDefinitions = new ColumnDefinitions(NotaNum.F($"{LabW},*")) };
             tRow.Children.Add(Caps("TARGET")); tRow.Children.Add(Col(target, 1));
             var smooth = SliderRow("SMOOTH", ModSmooth, SmoothF);
             ToolTip.SetTip(smooth, Loc.T("device.auto_filter.smooth_a_slew_on_the"));
@@ -513,9 +539,9 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
             var envSw = Toggle(EnvOn, "Envelope", live: () => engine.DeviceSidechainSource(track, di) >= 0 ? "Envelope on key" : "Envelope");
             ToolTip.SetTip(envSw, Loc.T("device.auto_filter.envelope_follower_on_off"));
             var hold = Latch(EnvHold, () => Loc.T("device.auto_filter.hold"), Loc.T("device.auto_filter.hold_keep_the_envelope_at"), fill: true);
-            var holdRow = new Grid { ColumnDefinitions = new ColumnDefinitions("40,*"), ColumnSpacing = 0, VerticalAlignment = VerticalAlignment.Center };
+            var holdRow = new Grid { ColumnDefinitions = new ColumnDefinitions(NotaNum.F($"{LabW},*")), ColumnSpacing = 0, VerticalAlignment = VerticalAlignment.Center };
             var holdTime = DeviceCardKit.SliderRow("", () => P(EnvHoldTime), v => Raw(EnvHoldTime, (float)v), () => HoldF(P(EnvHoldTime)), out var holdSync,
-                begin: () => Begin(EnvHoldTime), end: () => End(EnvHoldTime), reset: () => Reset(EnvHoldTime), dim: () => !On(EnvHold), valueWidth: 34);
+                begin: () => Begin(EnvHoldTime), end: () => End(EnvHoldTime), reset: () => Reset(EnvHoldTime), dim: () => !On(EnvHold), valueWidth: ValW);
             readouts.Add(holdSync);
             Learn(holdTime, EnvHoldTime);
             hold.Margin = new Thickness(0, 0, 6, 0);
@@ -584,6 +610,8 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
         }
 
         Control root = CardLayout.IsMini(ctx, di) ? MiniBody() : LargeBody();
+        // Larger text (laptop-test): every text in the body is drawn TextStep points larger.
+        NotaTextSize.SetCardStep(root, TextStep);
 
         // ======================================================================
         // L: tab frame + the panel that follows it

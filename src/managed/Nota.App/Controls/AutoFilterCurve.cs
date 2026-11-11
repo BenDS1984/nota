@@ -162,6 +162,7 @@ internal sealed class AutoFilterCurve : FilterGraphBase
 
     public override void Render(DrawingContext ctx)
     {
+        using var _ = NotaTextSize.DrawingIn(this);   // graph text takes the card's text step
         var r = PlotRect;
         if (r.Width <= 0 || r.Height <= 0) return;
         DrawBack(ctx);

@@ -135,6 +135,7 @@ internal sealed class AfEnvView : AfWindowBase
 
     public override void Render(DrawingContext ctx)
     {
+        using var _ = NotaTextSize.DrawingIn(this);   // graph text takes the card's text step
         double w = Bounds.Width, h = Bounds.Height;
         if (w <= 0 || h <= 0) return;
         var frame = new Rect(0, 0, w, h);
@@ -223,6 +224,7 @@ internal sealed class AfLfoView : AfWindowBase
 
     public override void Render(DrawingContext ctx)
     {
+        using var _ = NotaTextSize.DrawingIn(this);   // graph text takes the card's text step
         double w = Bounds.Width, h = Bounds.Height;
         if (w <= 0 || h <= 0) return;
         var frame = new Rect(0, 0, w, h);
