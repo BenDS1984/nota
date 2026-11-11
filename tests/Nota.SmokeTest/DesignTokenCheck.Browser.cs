@@ -16,7 +16,7 @@ internal static partial class DesignTokenCheck
         var types = new[] { BuiltinDeviceType.Instrument, BuiltinDeviceType.AudioEffect, BuiltinDeviceType.MidiEffect };
         var expected = new Dictionary<BuiltinDeviceType, int>
         {
-            [BuiltinDeviceType.Instrument] = 17, [BuiltinDeviceType.AudioEffect] = 27, [BuiltinDeviceType.MidiEffect] = 7,   // + the MIDI Effect Rack (specs/040)
+            [BuiltinDeviceType.Instrument] = 17, [BuiltinDeviceType.AudioEffect] = 27, [BuiltinDeviceType.MidiEffect] = 8,   // + the MIDI Effect Rack (specs/040) and Nota Transpose
         };
         foreach (var type in types)
         {

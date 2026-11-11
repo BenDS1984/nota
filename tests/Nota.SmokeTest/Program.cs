@@ -156,6 +156,14 @@ if (args.Length >= 1 && args[0] == "--audiocheck")
     return f == 0 ? 0 : 1;
 }
 
+if (args.Length >= 1 && args[0] == "--transpose")
+{
+    Console.WriteLine("-- Nota Transpose (MIDI effect kind 7) --");
+    foreach (var (ok, label) in TransposeTests.Run()) Check(ok, label);
+    Console.WriteLine(failures == 0 ? "TRANSPOSE PASSED" : $"TRANSPOSE FAILED ({failures})");
+    return failures == 0 ? 0 : 1;
+}
+
 if (args.Length >= 1 && args[0] == "--midi-lane-heights")
 {
     foreach (var (ok, label) in MidiLaneHeightTests.Run()) Check(ok, label);

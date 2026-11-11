@@ -558,7 +558,7 @@ internal sealed partial class RackCardView
     }
 
     private static readonly (string Name, int Kind)[] RcMidiKinds =
-        [("Nota Arp", 0), ("Nota Chord", 1), ("Nota Scale", 2), ("Nota Length", 3), ("Nota Velocity", 4), ("Nota Random", 5)];
+        [("Nota Arp", 0), ("Nota Chord", 1), ("Nota Scale", 2), ("Nota Length", 3), ("Nota Velocity", 4), ("Nota Random", 5), ("Nota Transpose", 7)];
 
     private void RcAddMidiMenu(Control anchor, int c)
     {

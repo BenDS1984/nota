@@ -15,6 +15,7 @@ internal sealed class MidiDeviceCardFactory
     private readonly IMidiDeviceBody _length = new LengthMidiBody();
     private readonly IMidiDeviceBody _velocity = new VelocityMidiBody();
     private readonly IMidiDeviceBody _random = new RandomMidiBody();
+    private readonly IMidiDeviceBody _transpose = new TransposeMidiBody();
     private readonly IMidiDeviceBody _generic = new GenericMidiBody();
 
     public IMidiDeviceBody Resolve(int midiEffectKind) => midiEffectKind switch
@@ -25,6 +26,7 @@ internal sealed class MidiDeviceCardFactory
         3 => _length,
         4 => _velocity,
         5 => _random,
+        7 => _transpose,
         _ => _generic,
     };
 }

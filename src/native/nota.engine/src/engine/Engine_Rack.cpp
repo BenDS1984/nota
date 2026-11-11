@@ -1413,7 +1413,7 @@ int32_t Engine::rackChainMidiCount(int32_t t, int32_t di, int32_t c) const {
 }
 int32_t Engine::rackAddChainMidi(int32_t t, int32_t di, int32_t c, int32_t kind) {
     auto* r = rackCoreAt(t, di);
-    if (!r || c < 0 || c >= r->chainCount() || kind < 0 || kind > 5) return -1;
+    if (!r || c < 0 || c >= r->chainCount() || kind < 0 || kind > 7 || kind == 6) return -1;   // built-in MIDI effects; 6 = the MIDI Effect Rack
     if (dynamic_cast<DrumRack*>(r)) return -1; // pads keep their own note handling
     if (di == -1 && c >= RackInstrument::kMaxMidiChains) return -1; // MIDI effects run in the first 16 chains
     return rackForEdit(t, di)->addChainMidiDevice(c, kind);
