@@ -126,6 +126,8 @@ public partial class App : Avalonia.Application
         NotaUiScale.Set(Services.GetRequiredService<ISettingsService>().Current.InterfaceScale);
         // Text size (spec 038), likewise: every text the app draws takes its step.
         NotaTextSize.Set(Services.GetRequiredService<ISettingsService>().Current.TextSize);
+        // Device size, likewise: the Devices panel's card row is built at it.
+        NotaDeviceScale.Set(Services.GetRequiredService<ISettingsService>().Current.DeviceScale);
         TranslateAppMenu();
         TextBoxMenu.Install();   // the text boxes' Cut / Copy / Paste menu is Avalonia's, in English
 
