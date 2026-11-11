@@ -51,6 +51,9 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
     private static readonly string[] NoteNames = { "C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B" };
 
     public double Width => 700;
+    /// <summary>The Filter tab's knob column (laptop-test): a 40 knob, a 6 gap and its value / name
+    /// beside it — as wide as the widest value ("18.00 k"), centred in the room right of the graph.</summary>
+    private const double KnobColW = 80;
     /// <summary>How many points larger than the device scale this card draws its text (laptop-test).</summary>
     private const int TextStep = 2;
     /// <summary>The right panel's label and value columns, widened for the larger text (were 40 and 34).</summary>
@@ -248,7 +251,7 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
         // their two lines of text fit the graph's height without touching.
         static Control KnobColumn(params Control[] cells)
         {
-            var g = new Grid { Width = 92 };
+            var g = new Grid { Width = KnobColW };
             for (int i = 0; i < cells.Length; i++)
             {
                 g.RowDefinitions.Add(new RowDefinition(GridLength.Star));
@@ -315,7 +318,9 @@ internal sealed class AutoFilterDeviceBody : IDeviceBody
                 Children =
                 {
                     Docked(switches, Dock.Bottom),
-                    Docked(new Border { Margin = new Thickness(6, 0, 0, 0), Child = right }, Dock.Right),
+                    // 92 of room (was the column's width): the column sits in its middle,
+                    // as far from the graph as from the panel's edge (with its 6 margin).
+                    Docked(new Border { Margin = new Thickness(6 + (92 - KnobColW) / 2, 0, (92 - KnobColW) / 2, 0), Child = right }, Dock.Right),
                     curve,
                 },
             };
