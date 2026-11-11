@@ -182,6 +182,12 @@
               </ToggleButton>
             </StackPanel>
           </Border>
+          <!-- Show / hide the Detail panel (View → Toggle detail panel). Lit (the soft tint)
+               while the panel is open; MainWindow.Detail.cs keeps it in step. -->
+          <ToggleButton x:Name="DetailToggleBtn" Classes="tp-icon" Click="OnDetailToggleClick"
+                        ToolTip.Tip="{app:T 'main.toggle_detail_panel'}" AutomationProperties.Name="{app:T 'main.toggle_detail_panel'}">
+            <app:Glyph Kind="BottomPanel" Size="16"/>
+          </ToggleButton>
         </StackPanel>
 
         <!-- Transport and timing: the transport keys in their well, then the position, the

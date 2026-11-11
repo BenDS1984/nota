@@ -1177,6 +1177,7 @@ public partial class MainWindow
         {
             if (e.Property != IsVisibleProperty) return;
             if (!DetailPanel.IsVisible) SetDetailMaximized(false);
+            DetailToggleBtn.IsChecked = DetailPanel.IsVisible;
             FollowDetailVisibility(DetailPanel.IsVisible);
             SyncDetailEdge();
             Dispatcher.UIThread.Post(FitBottomPanels);
