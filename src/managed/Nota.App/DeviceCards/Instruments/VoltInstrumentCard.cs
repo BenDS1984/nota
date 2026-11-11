@@ -58,7 +58,10 @@ internal sealed class VoltInstrumentCard : IInstrumentCard
         return MidiCardHeader.SizeToggle(ctx, () => InstrumentView.IsMini(e, t), m => InstrumentView.SetMini(e, t, m));
     }
 
-    private const double WheelsW = 52, RailW = 170, TabH = 20, BodyH = 204, MiniRowH = 53;
+    /// <summary>How many points larger than the device scale this card draws its text (laptop-test).</summary>
+    private const int TextStep = 2;
+    private const double WheelsW = 62, RailW = 174,   // laptop-test: were 52 and 170, room for the larger text
+        TabH = 20, BodyH = 204, MiniRowH = 53;
 
     private static readonly string[] TabNames = { "Osc", "Filter", "Env", "LFO", "Mod", "Macro" };
     private static readonly string[] RailTabs = { "Global", "Voice" };
@@ -373,7 +376,7 @@ internal sealed class VoltInstrumentCard : IInstrumentCard
         // One grid for all three sources, so the column headers sit over their own cells.
         var oscGrid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("38,Auto,*,*,*,*,*,*,*,Auto"), ColumnSpacing = 3,
+            ColumnDefinitions = new ColumnDefinitions("38,Auto,*,*,*,*,*,*,*,Auto"), ColumnSpacing = 2,   // laptop-test: was 3
             RowDefinitions = new RowDefinitions("*,*,*"),
         };
         void OscCell(Control c, int row, int col, int span = 1)
@@ -416,7 +419,11 @@ internal sealed class VoltInstrumentCard : IInstrumentCard
             var rule = new Border { BorderBrush = NotaPalette.GraphBorder, BorderThickness = new Thickness(0, 1, 0, 0) };
             Grid.SetRow(rule, 2); Grid.SetColumnSpan(rule, 10); oscGrid.Children.Add(rule);
             OscCell(Section("NOISE"), 2, 0);
-            OscCell(Chips("noisecolor", NoiseNames, () => NoiseBand(G("noisecolor")), iv => { SetP("noisecolor", NoiseStops[iv]); Refresh(); }), 2, 1);
+            // laptop-test: the larger noise chips span into the first knob column, so the wave
+            // column stays as narrow as the wave chips and the knobs get the room.
+            var noiseChips = Chips("noisecolor", NoiseNames, () => NoiseBand(G("noisecolor")), iv => { SetP("noisecolor", NoiseStops[iv]); Refresh(); });
+            noiseChips.HorizontalAlignment = HorizontalAlignment.Left;
+            OscCell(noiseChips, 2, 1, 2);
             OscCell(PKnob("noise", "LEVEL", "Noise Level", Pct, 26, 34), 2, 8);
 
             var mixBar = new MixBar(engine, track, new[] { I("osc1level"), I("osc2level"), I("noise") });
@@ -432,7 +439,7 @@ internal sealed class VoltInstrumentCard : IInstrumentCard
                 Spacing = 2, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0),
                 Children = { Cap("MIX SUM"), mixBar, mixVal },
             };
-            OscCell(mixCell, 2, 2, 6);   // the colour chips set the noise colour; no knob doubling them
+            OscCell(mixCell, 2, 3, 5);   // the colour chips set the noise colour; no knob doubling them
             OscCell(RouteCell("noiseroute"), 2, 9);
         }
         var oscBody = new Border { Padding = new Thickness(5, 3), Child = oscGrid };
@@ -901,8 +908,8 @@ internal sealed class VoltInstrumentCard : IInstrumentCard
             Children =
             {
                 CapRow("AMP 1", "AMP 2"),
-                KnobRow(PKnob("amp1level", "LEVEL", "Amp 1 Level", Pct, 24, 38), PKnob("amp1pan", "PAN", "Amp 1 Pan", PanText, 24, 38),
-                        PKnob("amp2level", "LEVEL", "Amp 2 Level", Pct, 24, 38), PKnob("amp2pan", "PAN", "Amp 2 Pan", PanText, 24, 38)),
+                KnobRow(PKnob("amp1level", "LEVEL", "Amp 1 Level", Pct, 24, 42), PKnob("amp1pan", "PAN", "Amp 1 Pan", PanText, 24, 42),
+                        PKnob("amp2level", "LEVEL", "Amp 2 Level", Pct, 24, 42), PKnob("amp2pan", "PAN", "Amp 2 Pan", PanText, 24, 42)),
                 Rule(new StackPanel
                 {
                     Spacing = 3,
@@ -911,8 +918,8 @@ internal sealed class VoltInstrumentCard : IInstrumentCard
                         uniRow,
                         // With one voice Detune is the partner oscillator's distance (up to 25 c);
                         // with 2 / 4 / 7 it is the spread of the stack (±50 c) and Spread pans it.
-                        KnobRow(PKnob("unison", "DETUNE", "Unison", Pct, 24, 38, Teal), PKnob("unispread", "SPREAD", "Unison Spread", Pct, 24, 38),
-                                PKnob("velamp", "VEL AMP", "Vel→Amp", Pct, 24, 38), PKnob("velfilter", "VEL FIL", "Vel→Filter", Pct, 24, 38)),
+                        KnobRow(PKnob("unison", "DETUNE", "Unison", Pct, 24, 42, Teal), PKnob("unispread", "SPREAD", "Unison Spread", Pct, 24, 42),
+                                PKnob("velamp", "VEL AMP", "Vel→Amp", Pct, 24, 42), PKnob("velfilter", "VEL FIL", "Vel→Filter", Pct, 24, 42)),
                     },
                 }),
             },
@@ -989,6 +996,8 @@ internal sealed class VoltInstrumentCard : IInstrumentCard
         Grid.SetColumn(rail, 2); body.Children.Add(rail);
 
         var root = new Border { Background = NotaPalette.SurfaceCard, Child = body };
+        // Larger text (laptop-test): every text in the card is drawn TextStep points larger.
+        NotaTextSize.SetCardStep(root, TextStep);
 
         ctx.SetInstLiveViz(Refresh);
         ShowRailTab();

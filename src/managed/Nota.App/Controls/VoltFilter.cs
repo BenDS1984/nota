@@ -131,6 +131,7 @@ namespace Nota.App;
 
         public override void Render(DrawingContext ctx)
         {
+            using var _ = NotaTextSize.DrawingIn(this);   // graph text takes the card's text step
             double w = Bounds.Width, h = Bounds.Height; if (w <= 0 || h <= 0) return;
             DrawBack(ctx);
             var (lo, hi) = FreqRange;
